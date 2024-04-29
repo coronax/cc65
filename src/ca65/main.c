@@ -350,6 +350,10 @@ static void SetSys (const char* Sys)
             NewSymbol ("__RP6502__", 1);
             break;
 
+        case TGT_P65:
+            NewSymbol ("__PROJECT65__", 1);
+            break;
+
         default:
             AbEnd ("Invalid target name: '%s'", Sys);
 
