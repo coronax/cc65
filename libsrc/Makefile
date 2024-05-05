@@ -32,6 +32,7 @@ TARGETS = apple2       \
           nes          \
           none         \
           osic1p       \
+		  p65          \
           pce          \
           rp6502       \
           sim6502      \
