@@ -10,7 +10,22 @@ P65_DEV_SERIAL1   = 0			; Serial console
 P65_DEV_SDCONTROL = 1			; Command channel for SD filesystem
 P65_DEV_FILE0     = 2			; Open file #0
 P65_DEV_FILE1     = 3			; Open file #1
-P64_DEV_SENTINEL  = 4			; demarcates end of device list
+P65_DEV_SENTINEL  = 4			; demarcates end of device list
+
+P65_CURRENT_DEVICE = $0220
+P65_DEVICE_OFFSET = $0222
+DEVTAB = $0290
+
+; DEVTAB entry format
+.struct DEVENTRY
+	CHANNEL   .byte
+	FILEMODE  .byte   ; contains file mode if the dev is open, else 0.
+	INIT      .word
+	GETC	  .word
+	PUTC      .word
+	OPEN	  .word
+	CLOSE	  .word
+.endstruct
 
 ;-----------------------------------------------------------------------------
 ; P65 User program arguments & return
@@ -36,9 +51,9 @@ P65_OPEN_DEV    	= $FFDA		; Opens a specific device
 P65_CLOSE_DEV   	= $FFDD
 P65_COMMANDLINE     = $FFE0
 P65_OUTPUTSTRING    = $FFE3		; Writes 0-terminated string to console.
-P65_PutChar     	= $FFE6		; Write character in A to console
-P65_GetChar         = $FFE9
-P65_PutHexit        = $FFEC		; Writes character to console as hex
+P65_PUT_CHAR     	= $FFE6		; Write character in A to console
+P65_GET_CHAR        = $FFE9
+P65_PUT_HEXIT       = $FFEC		; Writes character to console as hex
 P65_DEV_PUTC 		= $FFEF		; Write character to current device
 P65_DEV_GETC 		= $FFF2		; Read character from current device
 P65_SETDEVICE 		= $FFF5
