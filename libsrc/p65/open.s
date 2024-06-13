@@ -1,18 +1,22 @@
+; POSIX IO functions
 ; Project:65 C Library
+; Christopher Just
+;
 ; int __cdecl__ open (const char* name, int flags, ...)
 ;
 
-        .export _open, _dummy_open, _dummy
-        .importzp sp
+        .export _open
+        .importzp tmp1
         .import incsp2, addysp, popax
- 	    .include "p65.inc"
+        .include "p65.inc"
+        .include "filedes.inc"
 
+.if 0
 .proc _dummy
-	jsr incsp2	; add 2 to stack pointer
-	jsr incsp2  ; add 2 to stack pointer again
+	jsr incsp2      ; add 2 to stack pointer
+	jsr incsp2      ; add 2 to stack pointer again
 	rts
 .endproc
-
 
 .proc _dummy_open
 parmok:
@@ -34,7 +38,7 @@ parmok:
         ldx     #$FF
         rts
 .endproc
-
+.endif
 
 
 
@@ -52,19 +56,24 @@ parmok:
         jsr     addysp          ; Fix stack, throw away unused parameters
 parmok:
         ; With the variadic arguments out of the way, let's get to work.
-        ; First, we need to find an open device table entry. The P:65 OS
+        ; First, we need a file descriptor
+        jsr     allocfd
+        bcs     on_fail
+        sta     tmp1            ; Stash fd
+
+        ; Next, we need to find an open device table entry. The P:65 OS
         ; provides two file I/O devices. If a device's filemode in the 
         ; device table is 0, that means the device is not in use.
-		lda		#P65_DEV_FILE0
-		jsr		P65_SETDEVICE
-		ldx		P65_DEVICE_OFFSET
-		lda		DEVTAB + DEVENTRY::FILEMODE,X
-		beq		do_open         ; If filemode == 0, device is available
+        lda     #P65_DEV_FILE0
+        jsr     P65_SETDEVICE
+        ldx     P65_DEVICE_OFFSET
+        lda     DEVTAB + DEVENTRY::FILEMODE,X
+        beq     do_open         ; If filemode == 0, device is available
 
-		lda 	#P65_DEV_FILE1
-		jsr		P65_SETDEVICE
-		ldx		P65_DEVICE_OFFSET
-		lda		DEVTAB + DEVENTRY::FILEMODE,X
+        lda     #P65_DEV_FILE1
+        jsr     P65_SETDEVICE
+        ldx     P65_DEVICE_OFFSET
+        lda     DEVTAB + DEVENTRY::FILEMODE,X
         bne     on_fail
 
 do_open:
@@ -78,15 +87,26 @@ do_open:
         jsr     P65_SET_FILENAME
 
         ; And now we make the actual open call.
-		jsr		P65_OPEN_DEV    
+        jsr     P65_OPEN_DEV    
         cmp     #'0'    ; In 2013 it apparently made sense to return '0'
-		beq		on_fail ; for failure, and '1' for success.
+	beq	on_fail ; for failure, and '1' for success.
 
-		lda		P65_CURRENT_DEVICE  ; On success, return # of current device.
-		ldx		#0				    ; cc65 __fopen wants us to return a 16-bit value
-		rts
+        ; Set fdtab entry values
+        ldx     P65_DEVICE_OFFSET
+        lda     DEVTAB + DEVENTRY::FILEMODE,x
+        tay
+        ldx     P65_CURRENT_DEVICE
+        lda     tmp1            ; Retrieve fd
+        jsr     setfd           ; Update fdtab
+
+	lda	tmp1            ; Retrieve & return fd
+	ldx	#0	        ; cc65 __fopen wants us to return a 16-bit value
+	rts
+
 on_fail:
-    	lda		#$ff
+        lda	#$ff
         ldx     #$ff
-	    rts
+        rts
 .endproc
+
+

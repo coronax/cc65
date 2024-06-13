@@ -1,13 +1,16 @@
-; Project:65 library -- Christopher Just
+; POSIX IO functions
+; Project:65 C Library
+; Christopher Just
 ;
 ; int __fastcall__ read (int fd, void* buffer, int count)
 ;
 
         .export _read
-        .importzp sp, ptr1, tmp1, tmp2, tmp3
+        .importzp ptr1, tmp1, tmp2, tmp3, tmp4
         .import popax
- 	    .include "p65.inc"
+        .include "p65.inc"
         .include "fcntl.inc"
+        .include "filedes.inc"
 
 ; It looks like this read() is closely modeled on the Unix version. So
 ; that means it will read up to count characters into buffer, and return
@@ -20,7 +23,9 @@
 ;    sp     #<buffer
 ; and count will be in AX
 ; We're going to use cc65's ptr1 for the buffer address
-; We'll use tmp1/2 to store count, Y and tmp3 to store result
+; We'll use tmp1/2 to store count, Y and tmp3 to store result.
+; Also use tmp4 to store the fd.
+; Uses AXY
 .proc _read
         cmp #0
         bne nonzero
@@ -35,27 +40,28 @@ nonzero:
         sta ptr1
         stx ptr1+1      ; ptr1 points to buffer
 
-        jsr popax
-        jsr P65_SETDEVICE   ; set active device
-
-        ; We should probably check if the file is actually open.
-        ldx	P65_DEVICE_OFFSET
-		lda	DEVTAB + DEVENTRY::FILEMODE,X
+        jsr popax       ; get file descriptor from stack
+        sta tmp4        ; stash it in tmp4
+        jsr getfdflags  ; check if file is open for reading
         and #O_RDONLY
-        bne start_read
+        bne flags_ok
         lda #$FF
         ldx #$FF
         rts             ; return -1 for failure
-start_read:
+
+flags_ok:
+        lda tmp4        ; Retrieve fd
+        jsr getfddevice
+        jsr P65_SETDEVICE   ; set active device
+
         stz tmp3        ; initialize read count
         ldy #0
  
 loop:
-        ;lda #'+'
-        ;jsr P65_PUT_CHAR
         jsr P65_DEV_GETC
+        bcc loop
         cpx #$FF
-        beq done        ; apparently we received EOF
+        beq done        ; $FF in X means we received EOF
         sta (ptr1),y    ; save character to buffer
         iny
         bne test_count
