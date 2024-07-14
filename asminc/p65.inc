@@ -44,6 +44,10 @@ P65_program_ret     = $0289		; Store return code of called program
 ;-----------------------------------------------------------------------------
 ; P65 Kernel routines
 
+P65_DEV_IOCTL       = $FFC5
+P65_DEV_SEEK        = $FFC8
+P65_DEV_TELL        = $FFCB
+P65_DEV_GET_STATUS  = $FFCE
 P65_FILEOPEN    	= $FFD1		; Open filename and allocate a device for it
 P65_SET_FILENAME    = $FFD4		; Set filename (in AX) for subsequent FILEOPEN
 P65_SET_FILEMODE    = $FFD7		; Set mode (in A) for subsequent FILEOPEN

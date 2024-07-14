@@ -104,7 +104,7 @@ found_available:
 
 fdtab:  .assert .sizeof(FDTAB_ENTRY) = 2, error
 
-        .byte   0               ; stdin defaults to device 0
+        .byte   4               ; stdin defaults to device 0
         .byte   O_RDONLY        ; and is readonly
 
         .byte   0               ; stdout defaults to device 0
@@ -113,7 +113,11 @@ fdtab:  .assert .sizeof(FDTAB_ENTRY) = 2, error
         .byte   0               ; stderr defaults to device 0
         .byte   O_WRONLY        ; and is writeonly
 
-        .res    (MAX_FDS - 3) * .sizeof(FDTAB_ENTRY) ; remaining FDs
+.repeat MAX_FDS - 3
+        .byte   0
+        .byte   0
+.endrepeat
+;        .res    (MAX_FDS - 3) * .sizeof(FDTAB_ENTRY) ; remaining FDs
 
 
 

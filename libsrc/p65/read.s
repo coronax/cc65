@@ -6,11 +6,51 @@
 ;
 
         .export _read
+        .constructor initstdin
+        .destructor closestdin
         .importzp ptr1, tmp1, tmp2, tmp3, tmp4
-        .import popax
+        .import popax, __filetab
         .include "p65.inc"
         .include "fcntl.inc"
         .include "filedes.inc"
+        .include "_file.inc"    ; for _FOPEN
+
+;--------------------------------------------------------------------------
+; initstdin: Open (and therefore reinitialize) the TTY device attached to 
+; stdin. Pretty much every input function uses read(), so it makes sense to 
+; include this constructor here.
+.segment "ONCE"
+
+.proc   initstdin
+        lda #4                  ; device id for tty
+        jsr P65_SETDEVICE
+        jsr P65_OPEN_DEV        ; This should always succeed
+
+.if 1
+        ; Also, as a kludge here: clear the pushback buffer for standard IO
+        ; channels, and reset the flags to _FOPEN.
+        ; This doesn't make cc65 code reentrant, but it might solve one 
+        ; irritation that's come up during testing.
+        lda #_FOPEN
+        sta __filetab + 1
+        stz __filetab + 2
+        sta __filetab + 4
+        stz __filetab + 5
+        sta __filetab + 7
+        stz __filetab + 8
+.endif
+        rts
+.endproc
+
+.code
+
+.proc closestdin
+        lda #4                  ; close the tty device
+        jsr P65_SETDEVICE
+        jsr P65_CLOSE_DEV
+        rts
+.endproc
+
 
 ; It looks like this read() is closely modeled on the Unix version. So
 ; that means it will read up to count characters into buffer, and return
