@@ -7,9 +7,14 @@
 
         .export _open
         .importzp tmp1
-        .import incsp2, addysp, popax
+        .import _close, _fclose, incsp2, addysp, popax
+        .destructor closeallfiles
         .include "p65.inc"
+        .include "errno.inc"
         .include "filedes.inc"
+        .include "_file.inc"
+        .include "stdio.inc"    ; for FOPEN_MAX
+
 
 .if 0
 .proc _dummy
@@ -58,7 +63,7 @@ parmok:
         ; With the variadic arguments out of the way, let's get to work.
         ; First, we need a file descriptor
         jsr     allocfd
-        bcs     on_fail
+        bcs     fail_emfile
         sta     tmp1            ; Stash fd
 
         ; Next, we need to find an open device table entry. The P:65 OS
@@ -74,7 +79,7 @@ parmok:
         jsr     P65_SETDEVICE
         ldx     P65_DEVICE_OFFSET
         lda     DEVTAB + DEVENTRY::FILEMODE,X
-        bne     on_fail
+        bne     fail_emfile
 
 do_open:
         ; We found an available device table entry, so now we need to tell
@@ -88,8 +93,8 @@ do_open:
 
         ; And now we make the actual open call.
         jsr     P65_OPEN_DEV    
-        cmp     #'0'    ; In 2013 it apparently made sense to return '0'
-	beq	on_fail ; for failure, and '1' for success.
+        cpx     #0      ; 0 on success
+	bne	on_fail 
 
         ; Set fdtab entry values
         ldx     P65_DEVICE_OFFSET
@@ -104,9 +109,61 @@ do_open:
 	rts
 
 on_fail:
-        lda	#$ff
-        ldx     #$ff
-        rts
+        and #$7f                ; clear high bit of errno value.
+        jmp ___directerrno      ; eventually returhns -1 in AX
+
+fail_emfile:
+        lda #EMFILE
+        jmp ___directerrno      ; Eventually returns -1 in AX
 .endproc
 
 
+; Anything that is opened should be closed. In this case, i'm concerned with
+; _fdtab and __filetab elements not including stdin/out/error.
+; Technically, I only really need to clean up the OS devices that are left
+; open, but actually cleaning up the data structures here will make it 
+; easier to run programs multiple times without reloading. This is certainly
+; not sufficient to make cc65 programs re-executable, but it will make testing
+; go a little faster.
+.proc closeallfiles
+        ; So just zeroing out filetab doesn't quite work for some reason.
+        ; So we'll actually go through and call _fclose on each entry.
+        ; I believe _fclose will check if the file is actually open, so
+        ; we don't have to here.
+        ; Since I'm only interested in __filetab[3] thru __filetab[7] I'm 
+        ; just going to write this without a loop.
+        lda #<(__filetab + 9)
+        ldx #>(__filetab + 9)
+        jsr _fclose
+        lda #<(__filetab + 12)
+        ldx #>(__filetab + 12)
+        jsr _fclose
+        lda #<(__filetab + 15)
+        ldx #>(__filetab + 15)
+        jsr _fclose
+        lda #<(__filetab + 18)
+        ldx #>(__filetab + 18)
+        jsr _fclose
+        lda #<(__filetab + 21)
+        ldx #>(__filetab + 21)
+        jsr _fclose
+
+.if 0
+        ; The above will only close files opened via fopen. If the application
+        ; used open directly, it's not enough. We could do a 2nd pass through
+        ; fdtab, like this:
+        lda #3
+loop2:  ldx #0
+        pha
+        jsr _close      ; we'll let close() check if the fd is actually open,
+        pla             ; and just ignore the result.
+        inc
+        cmp #MAX_FDS
+        bne loop2
+
+        ; But then what if the application used the P65 Kernel interface 
+        ; directly? Then we need to close those directly. Which is exactly
+        ; what we were thinking about doing in the first place.
+.endif
+        rts
+.endproc

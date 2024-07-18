@@ -9,6 +9,7 @@
         .importzp sp, ptr1, tmp1, tmp2, tmp3, tmp4
         .import popax
         .include "p65.inc"
+        .include "errno.inc"
         .include "fcntl.inc"
         .include "filedes.inc"
 
@@ -40,12 +41,19 @@ nonzero:
 
         jsr popax       ; file descriptor
         sta tmp4
+        cpx #0          ; and let's make sure fd is valid, so
+        bne bad_fd      ; it's 0 <= fd < max_fds
+        cmp #MAX_FDS
+        bcs bad_fd
+
         jsr getfdflags  ; check if file is open for writing
         and #O_WRONLY
         bne flags_ok
-        lda #$FF
-        ldx #$FF
-        rts             ; return -1 for failure
+        lda EINVAL      ; flags are not ok
+        jmp ___directerrno      ; eventually returns -1 in AX
+        ;lda #$FF
+        ;ldx #$FF
+        ;rts             ; return -1 for failure
 
 flags_ok:
         lda tmp4                ; Retrieve the fd
@@ -80,4 +88,7 @@ done:
         ldx tmp3
         rts
 
+bad_fd:
+        lda #EBADF
+        jmp ___directerrno      ; Eventually returns -1 in AX
 .endproc
