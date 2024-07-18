@@ -16,6 +16,10 @@ P65_CURRENT_DEVICE = $0220
 P65_DEVICE_OFFSET = $0222
 DEVTAB = $0290
 
+; These are in here because DEV_LSEEK uses them:
+P65_ptr1 = $e9
+P65_ptr2 = $eb
+
 ; DEVTAB entry format
 .struct DEVENTRY
 	CHANNEL   .byte
