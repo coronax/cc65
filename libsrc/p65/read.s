@@ -81,24 +81,20 @@ nonzero:
         sta ptr1
         stx ptr1+1      ; ptr1 points to buffer
 
-        jsr popax       ; get file descriptor from stack
-        sta tmp4        ; stash it in tmp4
-        cpx #0          ; and let's make sure fd is valid, so
-        bne bad_fd      ; it's 0 <= fd < max_fds
-        cmp #MAX_FDS
+        jsr popax       ; Get file descriptor from stack.
+        sta tmp4        ; Save the value for later.
+        cpx #0          ; Check if it's valid. High byte must be 0.
+        bne bad_fd
+        cmp #MAX_FDS    ; Low byte must be less than MAX_FDS.
         bcs bad_fd
 
         jsr getfdflags  ; check if file is open for reading
         and #O_RDONLY
-        bne flags_ok
-        lda EINVAL      ; flags are not ok
-        jmp ___directerrno      ; eventually returns -1 in AX
-
-        ;lda #$FF
-        ;ldx #$FF
-        ;rts             ; return -1 for failure
-
-flags_ok:
+        beq bad_fd
+        ;bne flags_ok
+        ;lda #EINVAL      ; flags are not ok
+        ;jmp ___directerrno      ; Sets errno & returns -1.
+;flags_ok:
         lda tmp4        ; Retrieve fd
         jsr getfddevice
         jsr P65_SETDEVICE   ; set active device
@@ -132,5 +128,5 @@ done:
 
 bad_fd:
         lda #EBADF
-        jmp ___directerrno      ; Eventually returns -1 in AX
+        jmp ___directerrno      ; Sets errno & returns -1.
 .endproc

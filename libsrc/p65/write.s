@@ -48,9 +48,10 @@ nonzero:
 
         jsr getfdflags  ; check if file is open for writing
         and #O_WRONLY
-        bne flags_ok
-        lda EINVAL      ; flags are not ok
-        jmp ___directerrno      ; eventually returns -1 in AX
+        beq bad_fd
+        ;bne flags_ok
+        ;lda EINVAL      ; flags are not ok
+        ;jmp ___directerrno      ; eventually returns -1 in AX
         ;lda #$FF
         ;ldx #$FF
         ;rts             ; return -1 for failure

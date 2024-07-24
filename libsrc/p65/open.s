@@ -63,23 +63,25 @@ parmok:
         ; With the variadic arguments out of the way, let's get to work.
         ; First, we need a file descriptor
         jsr     allocfd
-        bcs     fail_emfile
-        sta     tmp1            ; Stash fd
+        bcs     fail_allocfd
+        sta     tmp1            ; Stash fd for later.
 
         ; Next, we need to find an open device table entry. The P:65 OS
         ; provides two file I/O devices. If a device's filemode in the 
         ; device table is 0, that means the device is not in use.
         lda     #P65_DEV_FILE0
         jsr     P65_SETDEVICE
-        ldx     P65_DEVICE_OFFSET
-        lda     DEVTAB + DEVENTRY::FILEMODE,X
+        jsr     P65_DEV_GET_STATUS
+        ;ldx     P65_DEVICE_OFFSET
+        ;lda     DEVTAB + DEVENTRY::FILEMODE,X
         beq     do_open         ; If filemode == 0, device is available
 
         lda     #P65_DEV_FILE1
         jsr     P65_SETDEVICE
-        ldx     P65_DEVICE_OFFSET
-        lda     DEVTAB + DEVENTRY::FILEMODE,X
-        bne     fail_emfile
+        jsr     P65_DEV_GET_STATUS
+        ;ldx     P65_DEVICE_OFFSET
+        ;lda     DEVTAB + DEVENTRY::FILEMODE,X
+        bne     fail_allocdev
 
 do_open:
         ; We found an available device table entry, so now we need to tell
@@ -94,11 +96,12 @@ do_open:
         ; And now we make the actual open call.
         jsr     P65_OPEN_DEV    
         cpx     #0      ; 0 on success
-	bne	on_fail 
+	bne	fail_os 
 
         ; Set fdtab entry values
-        ldx     P65_DEVICE_OFFSET
-        lda     DEVTAB + DEVENTRY::FILEMODE,x
+        jsr     P65_DEV_GET_STATUS
+        ;ldx     P65_DEVICE_OFFSET
+        ;lda     DEVTAB + DEVENTRY::FILEMODE,x
         tay
         ldx     P65_CURRENT_DEVICE
         lda     tmp1            ; Retrieve fd
@@ -108,13 +111,16 @@ do_open:
 	ldx	#0	        ; cc65 __fopen wants us to return a 16-bit value
 	rts
 
-on_fail:
-        and #$7f                ; clear high bit of errno value.
-        jmp ___directerrno      ; eventually returhns -1 in AX
+fail_os:
+        and #$7f                ; Clear high bit of errno value.
+        jmp ___directerrno      ; Sets errno & returns -1.
 
-fail_emfile:
+fail_allocdev:
+        lda tmp1                ; Recover the fd that we stashed.
+        jsr freefd              ; Release it before returning.
+fail_allocfd:
         lda #EMFILE
-        jmp ___directerrno      ; Eventually returns -1 in AX
+        jmp ___directerrno      ; Sets errno & returns -1.
 .endproc
 
 
@@ -148,9 +154,9 @@ fail_emfile:
         ldx #>(__filetab + 21)
         jsr _fclose
 
-.if 0
+.if 1
         ; The above will only close files opened via fopen. If the application
-        ; used open directly, it's not enough. We could do a 2nd pass through
+        ; used open directly, it's not enough. We can do a 2nd pass through
         ; fdtab, like this:
         lda #3
 loop2:  ldx #0
@@ -160,10 +166,17 @@ loop2:  ldx #0
         inc
         cmp #MAX_FDS
         bne loop2
-
-        ; But then what if the application used the P65 Kernel interface 
-        ; directly? Then we need to close those directly. Which is exactly
-        ; what we were thinking about doing in the first place.
+.endif
+.if 1
+        ; But What if the application used the P65 Kernel interface directly?
+        ; Well, we can just close those, too. We don't need to worry about the
+        ; return code.
+        lda #2
+        jsr P65_SETDEVICE
+        jsr P65_CLOSE_DEV
+        lda #3
+        jsr P65_SETDEVICE
+        jsr P65_CLOSE_DEV
 .endif
         rts
 .endproc

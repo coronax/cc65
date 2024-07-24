@@ -14,14 +14,16 @@
 ; Closes the file descriptor passed in AX.
 ; On success, returns 0.
 ; if FD is outside the range [0,MAX_FDS), returns -1 and sets errno
-; to EINVAL.
+; to EBADF.
 .proc _close
+        sta tmp1            ; Save FD for later
         cpx #$00            ; high byte of fd must be 0
-        bne invalid
+        bne bad_fd
         cmp #MAX_FDS        ; low byte must be < MAX_FDS
-        bcs invalid
-
-        sta tmp1
+        bcs bad_fd
+        jsr getfdflags      ; check if file is open for reading
+        beq bad_fd
+        lda tmp1
         jsr getfddevice
         jsr P65_SETDEVICE   ; fd is already in accumulator
         jsr P65_CLOSE_DEV
@@ -32,7 +34,7 @@
         lda #0
         tax
         rts
-invalid:
-        lda #EINVAL
+bad_fd:
+        lda #EBADF
         jmp ___directerrno      ; Eventually returns -1 in AX
 .endproc
