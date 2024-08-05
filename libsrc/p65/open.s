@@ -6,7 +6,7 @@
 ;
 
         .export _open
-        .importzp tmp1
+        .importzp tmp1, tmp2
         .import _close, _fclose, incsp2, addysp, popax
         .destructor closeallfiles
         .include "p65.inc"
@@ -79,8 +79,6 @@ parmok:
         lda     #P65_DEV_FILE1
         jsr     P65_SETDEVICE
         jsr     P65_DEV_GET_STATUS
-        ;ldx     P65_DEVICE_OFFSET
-        ;lda     DEVTAB + DEVENTRY::FILEMODE,X
         bne     fail_allocdev
 
 do_open:
@@ -94,19 +92,17 @@ do_open:
         jsr     P65_SET_FILENAME
 
         ; And now we make the actual open call.
-        jsr     P65_OPEN_DEV    
+        jsr     P65_OPEN_DEV  
         cpx     #0      ; 0 on success
-	bne	fail_os 
+	bne	fail_os
 
         ; Set fdtab entry values
+        sta     tmp2                    ; save filetype
         jsr     P65_DEV_GET_STATUS
-        ;ldx     P65_DEVICE_OFFSET
-        ;lda     DEVTAB + DEVENTRY::FILEMODE,x
         tay
         ldx     P65_CURRENT_DEVICE
         lda     tmp1            ; Retrieve fd
         jsr     setfd           ; Update fdtab
-
 	lda	tmp1            ; Retrieve & return fd
 	ldx	#0	        ; cc65 __fopen wants us to return a 16-bit value
 	rts
