@@ -32,6 +32,13 @@ P65_ptr2 = $eb
 .endstruct
 
 ;-----------------------------------------------------------------------------
+; P65 Custom error values (in addition to the cc65 errnos I've adopted)
+
+P65_ESYNTAX  =   $80 | 19
+P65_ENOTDIR  =   $80 | 20
+P65_EISDIR   =   $80 | 21
+
+;-----------------------------------------------------------------------------
 ; P65 User program arguments & return
 
 P65_argc		    = $0280   	; The input buffer will be parsed into a c-like

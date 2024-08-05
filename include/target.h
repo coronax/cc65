@@ -63,6 +63,8 @@
 #  include <osic1p.h>
 #elif defined(__PCE__)
 #  include <pce.h>
+#elif defined(__PROJECT65__)
+#  include <p65.h>
 #elif defined(__SUPERVISION__)
 #  include <supervision.h>
 #elif defined(__TELESTRAT__)

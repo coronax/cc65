@@ -114,6 +114,19 @@ extern struct dirent FileEntry;
 #define _DE_ISLBL(t)    (0)
 #define _DE_ISLNK(t)    (0)
 
+#elif defined(__PROJECT65__)
+
+struct dirent {
+    char d_name[13];
+    unsigned char d_type;
+    unsigned long d_size;
+};
+
+#define _DE_ISREG(t)  ((t) != 0x02)
+#define _DE_ISDIR(t)  ((t) == 0x02)
+#define _DE_ISLBL(t)  (0)
+#define _DE_ISLNK(t)  (0)
+
 #else
 
 struct dirent {
