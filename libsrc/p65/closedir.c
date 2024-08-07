@@ -1,5 +1,5 @@
 /* Project:65 C Library
- * Chrisotpher Just
+ * Christopher Just
  */
 
 #include <fcntl.h>
@@ -17,7 +17,7 @@ int closedir (DIR* dir)
     }
     else
     {
-        result = close(dir->fd);
+        result = close(dir->m_fd);
         free(dir);
     }
     return result;

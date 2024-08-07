@@ -1,5 +1,5 @@
 /* Project:65 C Library
- * Chrisotpher Just
+ * Christopher Just
  */
 
 #include <fcntl.h>
@@ -30,7 +30,7 @@ DIR* opendir (const char* name)
             DIR* dir = malloc(sizeof(DIR));
             if (dir)
             {
-                dir->fd = fd;
+                dir->m_fd = fd;
                 return dir;
             }
             else

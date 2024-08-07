@@ -1,5 +1,5 @@
 /* Project:65 C Library
- * Chrisotpher Just
+ * Christopher Just
  */
 
 
@@ -8,15 +8,13 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-//#include <errno.h>
 
 
 
 struct dirent *readdir(DIR *dir)
 {
-    static struct dirent ent;
-    if (sizeof(struct dirent) == read(dir->fd,&ent,sizeof(struct dirent)))
-        return &ent;
+    if (sizeof(struct dirent) == read(dir->m_fd,&dir->m_dirent,sizeof(struct dirent)))
+        return &dir->m_dirent;
     else
         return NULL;
 }
