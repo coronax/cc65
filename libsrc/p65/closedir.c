@@ -1,5 +1,8 @@
 /* Project:65 C Library
  * Christopher Just
+ *
+ * int __fastcall__ closedir (DIR* dir);
+ * 
  */
 
 #include <fcntl.h>
@@ -8,7 +11,7 @@
 #include "dir.h"
 
 
-int closedir (DIR* dir)
+int __fastcall__ closedir (DIR* dir)
 {
     int result = -1;
     if (dir == NULL)

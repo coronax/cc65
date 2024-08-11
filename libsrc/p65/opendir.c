@@ -1,5 +1,8 @@
 /* Project:65 C Library
  * Christopher Just
+ *
+ * int __fastcall__ opendir (const char* name);
+ * 
  */
 
 #include <fcntl.h>
@@ -15,7 +18,7 @@
 int __fastcall__ getfdtype(int fd);
 
 
-DIR* opendir (const char* name)
+DIR* __fastcall__ opendir (const char* name)
 {
     int fd;
     int tp;
@@ -25,7 +28,7 @@ DIR* opendir (const char* name)
     {
         tp = getfdtype(fd);
         //printf ("fdtype is %d\r\n",tp);
-        if (getfdtype(fd) == 2)
+        if (tp == 2) // 2 indicates a directory
         {
             DIR* dir = malloc(sizeof(DIR));
             if (dir)
@@ -43,7 +46,6 @@ DIR* opendir (const char* name)
         else
         {
             close(fd);
-            //__seterrno(EINTR);
             __mappederrno(P65_ENOTDIR);
             return NULL;
         }
