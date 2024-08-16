@@ -47,4 +47,4 @@ End:
 __sys_oserrlist:
         sys_oserr_entry          P65_ENOTDIR, "Not a directory"
         sys_oserr_entry          P65_EISDIR, "Is a directory"
-        sys_oserr_sentinel      "Unknown error"
+        sys_oserr_sentinel      "Unknown OSerror"
