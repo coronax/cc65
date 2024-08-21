@@ -92,6 +92,8 @@ struct tm {
 /* Read the clock rate at runtime */
 clock_t __clocks_per_sec (void);
 #  define CLOCKS_PER_SEC        __clocks_per_sec()
+#elif defined(__PROJECT65__)
+#  define CLOCKS_PER_SEC        100
 #endif
 #define CLOCK_REALTIME          0
 

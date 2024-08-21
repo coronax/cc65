@@ -14,16 +14,14 @@ P65_DEV_TTY       = 4
 P65_DEV_SENTINEL  = 5			; demarcates end of device list
 
 P65_CURRENT_DEVICE = $0220
-;P65_DEVICE_OFFSET = $0222
-;DEVTAB = $0290
 
 ; This is available unless/until I add a proper clock device.
 P65_TOD_SECONDS = $0206 ; 32-bit count of seconds.
 P65_TOD_SECONDS100 = $020a ; 8-bit hundredths of seconds
 
 ; These are in here because DEV_LSEEK uses them:
-P65_ptr1 = $e9
-P65_ptr2 = $eb
+P65_ptr1 = $30
+P65_ptr2 = $32
 
 ; DEVTAB entry format
 ;.struct DEVENTRY
@@ -55,7 +53,9 @@ P65_argv2L          = $0285
 P65_argv2H          = $0286
 P65_argv3L          = $0287
 P65_argv3H          = $0288
-P65_program_ret     = $0289		; Store return code of called program
+P65_argv4L          = $0289
+P65_argv4H          = $028a
+P65_program_ret     = $028b		; Store return code of called program
 
 ;-----------------------------------------------------------------------------
 ; P65 Kernel routines
