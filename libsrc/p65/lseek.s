@@ -47,9 +47,12 @@ flags_ok:
         pla                 ; load whence into A
         jsr P65_DEV_SEEK
         
+
+
         ; check error code in A
-        cmp #EOK
-        bne ret_error       ; put the return value in the right place
+        lda P65_ptr2+1      ; error if high byte is $80
+        cmp #$80
+        beq ret_error       ; put the return value in the right place
         lda P65_ptr2
         ldx P65_ptr2+1
         sta sreg
@@ -59,14 +62,22 @@ flags_ok:
         ldx P65_ptr1+1
         rts                 ; return OK
 ret_error:
-        jsr P65_PUT_HEXIT
+        ;pha     ; save actual error code
+        ;jsr P65_PUT_HEXIT
         ;sta tmp4
-        ldx #$ff
+        ;ldx #$ff
         ;tax
-        stx sreg
-        stx sreg+1
-        ;jsr pushax              ; high word of result
+        ;stx sreg
+        ;stx sreg+1
+        ;jsr pushax             ; high word of result
         ;lda tmp4
+        lda #$ff
+        ;tax
+        ;jsr pushax
+        sta sreg                ; fill in high word of ret val, because ___directerrno won't
+        sta sreg+1
+        lda P65_ptr1            ; retrieve actual error value
+        ldx #0
         and #$7f
         jmp ___directerrno      ; Eventually returns -1 in AX
 
