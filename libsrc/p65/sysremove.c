@@ -40,6 +40,7 @@ int __fastcall__ _sysremove (const char* name)
     }
     else
     {
-        return ENOENT | 0x80;   // ie P65_ENOENT
+        // return whatever error got left behind by open().
+        return errno | _oserror | 0x80; //ENOENT | 0x80;   // ie P65_ENOENT
     }
 }
