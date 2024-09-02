@@ -48,6 +48,6 @@ int __fastcall__ _sysrename (const char* src, const char* dst)
     }
     else
     {
-        return ENOENT | 0x80;
+        return errno | _oserror | 0x80; // return error result from open as P:65 error
     }
 }
