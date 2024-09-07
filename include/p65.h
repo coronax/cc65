@@ -21,4 +21,8 @@
 // On failure, returns -1 & sets errno/oserror
 int copyfile (const char* src, const char* dst);
 
+// These are in here because things like DEV_LSEEK and FS_STAT use them:
+void** P65_ptr1 = (void**)0x30;
+void** P65_ptr2 = (void**)0x32;
+
 #endif

@@ -20,6 +20,7 @@ P65_TOD_SECONDS = $0206 ; 32-bit count of seconds.
 P65_TOD_SECONDS100 = $020a ; 8-bit hundredths of seconds
 
 ; These are in here because DEV_LSEEK uses them:
+; Note: Also declared in p65.h
 P65_ptr1 = $30
 P65_ptr2 = $32
 
@@ -60,14 +61,15 @@ P65_program_ret     = $028b		; Store return code of called program
 ;-----------------------------------------------------------------------------
 ; P65 Kernel routines
 
-P65_FS_MKDIR		= $FFBB
-P65_FS_RMDIR		= $FFBE
-P65_FS_RM			= $FFC1
-P65_FS_CP			= $FFC4
-P65_FS_MV			= $FFC7
-P65_DEV_IOCTL       = $FFCA
-P65_DEV_SEEK        = $FFCD
-;P65_DEV_TELL        = $FFCB
+P65_FS_STAT         = $FFB5
+P65_FS_MKDIR		= $FFB8
+P65_FS_RMDIR		= $FFBB
+P65_FS_RM			= $FFBE
+P65_FS_CP			= $FFC1
+P65_FS_MV			= $FFC4
+P65_DEV_IOCTL       = $FFC7
+P65_DEV_SEEK        = $FFCA
+P65_DEV_READ        = $FFCD
 P65_DEV_GET_STATUS  = $FFD0
 P65_FILEOPEN    	= $FFD3		; Open filename and allocate a device for it
 P65_SET_FILENAME    = $FFD6		; Set filename (in AX) for subsequent FILEOPEN
