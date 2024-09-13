@@ -7,12 +7,11 @@
 
         .export _lseek
         .importzp tmp1, tmp4, sreg
-        .import popax, pushax
+        .import popax
         .include "p65.inc"
         .include "errno.inc"
         .include "filedes.inc"
-        .include "_file.inc"
-        .include "stdio.inc"    ; for FOPEN_MAX
+
 
 .proc _lseek
 
@@ -36,9 +35,6 @@
 
         jsr getfdflags  ; check if file is open
         beq bad_fd
-        ;bne flags_ok
-        ;lda EINVAL      ; fd invalid (not open)
-        ;jmp ___directerrno      ; eventually returns -1 in AX
 
 flags_ok:
         lda tmp4        ; Retrieve fd
@@ -46,48 +42,25 @@ flags_ok:
         jsr P65_SETDEVICE   ; set active device
         pla                 ; load whence into A
         jsr P65_DEV_SEEK
-        
-
-
         ; check error code in A
-        lda P65_ptr2+1      ; error if high byte is $80
-        cmp #$80
-        beq ret_error       ; put the return value in the right place
-        lda P65_ptr2
+        cmp #0
+        bne ret_error
+
+        lda P65_ptr2            ; Copy the result in AX & sreg
         ldx P65_ptr2+1
         sta sreg
         stx sreg+1
-        ;jsr pushax
         lda P65_ptr1
         ldx P65_ptr1+1
-        rts                 ; return OK
-ret_error:
-        ;pha     ; save actual error code
-        ;jsr P65_PUT_HEXIT
-        ;sta tmp4
-        ;ldx #$ff
-        ;tax
-        ;stx sreg
-        ;stx sreg+1
-        ;jsr pushax             ; high word of result
-        ;lda tmp4
-        lda #$ff
-        ;tax
-        ;jsr pushax
-        sta sreg                ; fill in high word of ret val, because ___directerrno won't
-        sta sreg+1
-        lda P65_ptr1            ; retrieve actual error value
-        ldx #0
-        and #$7f
-        jmp ___directerrno      ; Eventually returns -1 in AX
+        rts                     ; return OK
 
 bad_fd:
-        ply                     ; Remove the whence we stashed on the stack
-        lda #$ff
-        ;tax
-        sta sreg
-        sta sreg+1
-        ;jsr pushax              ; high word of result
-        lda #EBADF
-        jmp ___directerrno      ; Eventually returns -1 in AX
+        pla                     ; We still have the whence argument on the stack.
+        lda #P65_EBADF          ; pass thru a P65 style error code to ___mappederrno
+
+ret_error:
+        ldx #$ff
+        stx sreg                ; fill in high word of 32-bit retval, because ___directerrno won't
+        stx sreg+1
+        jmp ___mappederrno
 .endproc
