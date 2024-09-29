@@ -14,6 +14,7 @@
 // The value returned in this implementation is the global sytem time, 
 // which can be set with clock_settime(). If never set, it's initialized to
 // 0 at system startup, not the program start time.
+// This count rolls over every 497 days.
 clock_t __fastcall__ clock (void)
 {
     clock_t result = *(unsigned char*)P65_TOD_SECONDS100;
