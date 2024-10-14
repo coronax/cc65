@@ -3,6 +3,7 @@
 ;
 ; unsigned char cursor (unsigned char onoff);
 ;
+.ifndef __PROJECT65__
 
         .export         _cursor
         .import         cursor
@@ -18,3 +19,4 @@
 
 .endproc
 
+.endif
