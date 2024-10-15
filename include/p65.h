@@ -34,7 +34,7 @@ int __cdecl__ ioctl(int fd, int op, ...);
 #define IO_FLUSH			1
 #define IO_AVAILABLE		2		// Returns # bytes available with blocking.
 
-#define IO_SER_RATE			32	    // not implemented yet
+#define IO_SER_RATE			36	    // not implemented yet
 
 #define IO_TTY_ECHO_ON		32
 #define IO_TTY_ECHO_OFF		33

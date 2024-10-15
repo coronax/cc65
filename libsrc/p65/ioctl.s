@@ -8,7 +8,6 @@
         .import incsp2, addysp, popax
         .include        "p65.inc"
         .include        "errno.inc"
-        ;.include        "fcntl.inc"
         .include        "filedes.inc"
 
 .proc _ioctl
@@ -17,6 +16,22 @@
         ; stack. I've borrowed this chunk of code from cbm/open.s which
         ; assumes there are at least 2 arguments (4 bytes), which are the 
         ; only ones I actually care about, and just discards the rest.
+        ; I currently have exactly 1 ioctl where I want to set an extra 
+        ; parameter. So we're going to check specifically for Y == 6, and
+        ; if so we'll take that parameter and stick it in P65_ptr1 until I 
+        ; have a better stack solution.
+        cpy #6
+        bne no_arg
+        jsr popax
+        sta P65_ptr1
+        stx P65_ptr1+1
+        ;jsr P65_PUT_HEXIT
+        ;lda P65_ptr1+1
+        ;jsr P65_PUT_HEXIT
+        dey 
+        dey
+        bra parmok
+no_arg:
         dey                     ; Parm count < 4 shouldn't be needed to be...
         dey                     ; ...checked (it generates a c compiler warning)
         dey
@@ -37,16 +52,13 @@ parmok:
         jsr P65_SETDEVICE   ; fd is already in accumulator
         pla
         jsr P65_DEV_IOCTL
-        ; If X == 0, we just rts. Otherwise we need to set errno
-        cpx #0
-        bne report_err
+        ; If X == FF, set errno. Otherwise we just rts.
+        cpx #$ff
+        beq report_err
         rts
 report_err:
         and #$7f                ; clear high bit of errno value.
         jmp ___directerrno      ; eventually returns -1 in AX
-        ;lda #0
-        ;tax
-        ;rts
 invalid:
         pla                 ; because we still had op on the stack
         lda #EINVAL
