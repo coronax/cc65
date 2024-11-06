@@ -122,6 +122,12 @@ unsigned char __fastcall__ bgcolor (unsigned char color)
         conio_bgcolor = color;
         fprintf (stdout, "\x1b[%dm", 40 + color);
     }
+    else if (color <= 15)
+    {
+        conio_bgcolor = color;
+        fprintf (stdout, "\x1b[%dm", 100 + color);
+    }
+
     return result;
 }
 

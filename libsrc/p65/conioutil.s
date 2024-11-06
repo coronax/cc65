@@ -8,7 +8,7 @@
 
 .export gotoxy, _cputc
 .import _gotoxy, popa
-.importzp ptr1
+.importzp ptr1, ptr2
 
 .include "p65.inc"
 
@@ -20,13 +20,24 @@ gotoxy:
         sta P65_ptr1
         lda ptr1+1
         sta P65_ptr1+1
+
+        lda ptr2
+        sta P65_ptr2
+        lda ptr2+1
+        sta P65_ptr2+1
+
         jsr     popa            ; Get Y
         jsr     _gotoxy
+
         lda P65_ptr1
         sta ptr1
         lda P65_ptr1+1
         sta ptr1+1
 
+        lda P65_ptr2
+        sta ptr2
+        lda P65_ptr2+1
+        sta ptr2+1
 
 _cputc:
         pha
