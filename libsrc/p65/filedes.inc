@@ -4,8 +4,8 @@
 ;
 
 .struct FDTAB_ENTRY
-        DEVTAB_INDEX .byte
-        FLAGS       .byte       ; access mode. O_RDONLY, etc.
+        DEVTAB_INDEX .byte      ; Index into kernel device table
+        FLAGS        .byte      ; access mode. O_RDONLY, etc.
         TYPE         .byte      ; 0 for stream, 1 for regular file, 2 for directory
         RESERVED     .byte
 .endstruct

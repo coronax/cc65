@@ -35,20 +35,17 @@ startup:
 	   	tsx
     	stx	spsave		; Save the system stack ptr
 
-		; Set the CC65 argument stack to the top of RAM at 0x7fff
+		; Set the CC65 parameter stack to the top of RAM at 0x7fff
 		; (Not 0x07ff - lost a day to that mistake!)
 		lda #$ff
 		sta	sp
 		ldx	#$7f
-    	stx	sp+1   	 		; Set argument stack ptr
+    	stx	sp+1
 
 		jsr	zerobss			; Clear BSS data
 
 		jsr initlib			; Call library constructors, etc.
 
-;		lda #'+'
-;		jsr P65_PutChar
-	
 		; Push arguments and call main()
 
     	jsr	callmain

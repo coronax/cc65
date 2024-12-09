@@ -141,7 +141,6 @@ fdtab:  .assert .sizeof(FDTAB_ENTRY) = 4, error
 .repeat MAX_FDS - 3
         .byte   0,0,0,0
 .endrepeat
-;        .res    (MAX_FDS - 3) * .sizeof(FDTAB_ENTRY) ; remaining FDs
 
 
 

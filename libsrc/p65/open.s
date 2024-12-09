@@ -16,36 +16,6 @@
         .include "stdio.inc"    ; for FOPEN_MAX
 
 
-.if 0
-.proc _dummy
-	jsr incsp2      ; add 2 to stack pointer
-	jsr incsp2      ; add 2 to stack pointer again
-	rts
-.endproc
-
-.proc _dummy_open
-parmok:
-        ; Retrieve the mode from the stack, and... store it on the other
-        ; stack for a moment.
-        jsr     popax
-        pha
-
-        ; Retrieve the filename from the parameter stack & print to console
-        jsr     popax
-        jsr     P65_OUTPUTSTRING
-
-        ; Now we can print the mode
-        pla
-        jsr     P65_PUT_HEXIT
-
-        ; Finally, we'll return an error code -1
-        lda     #$FF
-        ldx     #$FF
-        rts
-.endproc
-.endif
-
-
 
 .proc _open
         ; Open is technically a variadic function, which means that Y stores
@@ -72,8 +42,6 @@ parmok:
         lda     #P65_DEV_FILE0
         jsr     P65_SETDEVICE
         jsr     P65_DEV_GET_STATUS
-        ;ldx     P65_DEVICE_OFFSET
-        ;lda     DEVTAB + DEVENTRY::FILEMODE,X
         beq     do_open         ; If filemode == 0, device is available
 
         lda     #P65_DEV_FILE1
