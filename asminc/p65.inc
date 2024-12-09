@@ -81,29 +81,29 @@ P65_program_ret     = $028b		; Store return code of called program
 ;-----------------------------------------------------------------------------
 ; P65 Kernel routines
 
-P65_FS_STAT         = $FFB5
-P65_FS_MKDIR		= $FFB8
-P65_FS_RMDIR		= $FFBB
-P65_FS_RM			= $FFBE
-P65_FS_CP			= $FFC1
-P65_FS_MV			= $FFC4
-P65_DEV_IOCTL       = $FFC7
-P65_DEV_SEEK        = $FFCA
-P65_DEV_READ        = $FFCD
-P65_DEV_GET_STATUS  = $FFD0
-P65_FILEOPEN    	= $FFD3		; Open filename and allocate a device for it
-P65_SET_FILENAME    = $FFD6		; Set filename (in AX) for subsequent FILEOPEN
-P65_SET_FILEMODE    = $FFD9		; Set mode (in A) for subsequent FILEOPEN
-P65_OPEN_DEV    	= $FFDC		; Opens a specific device
-P65_CLOSE_DEV   	= $FFDF
-P65_COMMANDLINE     = $FFE2
-P65_OUTPUTSTRING    = $FFE5		; Writes 0-terminated string to console.
-P65_PUT_CHAR     	= $FFE8		; Write character in A to console
-P65_GET_CHAR        = $FFEB
-P65_PUT_HEXIT       = $FFEE		; Writes character to console as hex
-P65_DEV_PUTC 		= $FFF1		; Write character to current device
-P65_DEV_GETC 		= $FFF4		; Read character from current device
-P65_SETDEVICE 		= $FFF7
+P65_FS_STAT         = $FF9F
+P65_FS_MKDIR		= $FFA2
+P65_FS_RMDIR		= $FFA5
+P65_FS_RM			= $FFA8
+P65_FS_CP			= $FFAB
+P65_FS_MV			= $FFAE
+P65_DEV_IOCTL       = $FFB1
+P65_DEV_SEEK        = $FFB4
+P65_DEV_READ        = $FFB7
+P65_DEV_GET_STATUS  = $FFBA
+P65_FILEOPEN    	= $FFBD		; Open filename and allocate a device for it
+P65_SET_FILENAME    = $FFC0		; Set filename (in AX) for subsequent FILEOPEN
+P65_SET_FILEMODE    = $FFC3		; Set mode (in A) for subsequent FILEOPEN
+P65_OPEN_DEV    	= $FFC6		; Opens a specific device
+P65_CLOSE_DEV   	= $FFC9
+P65_COMMANDLINE     = $FFCC
+P65_OUTPUTSTRING    = $FFCF		; Writes 0-terminated string to console.
+P65_PUT_CHAR     	= $FFD2		; Write character in A to console
+P65_GET_CHAR        = $FFD5
+P65_PUT_HEXIT       = $FFD8		; Writes character to console as hex
+P65_DEV_PUTC 		= $FFDB		; Write character to current device
+P65_DEV_GETC 		= $FFDE		; Read character from current device
+P65_SETDEVICE 		= $FFE1
 
 ;----------------------------------------------------------------------------
 ; Vector jump locations
