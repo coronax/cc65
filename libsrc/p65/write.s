@@ -25,6 +25,53 @@
 ; We're going to use cc65's ptr1 for the buffer address.
 ; We'll use tmp1/2 to store count, Y and tmp3 to store result.
 ; Also use tmp4 to store the fd.
+
+.proc _write
+        ; Version using the OS read command P65_DEV_READ
+        ; which requires the buffer in P65_ptr1 and the count in AX.
+        pha             ; save count 
+        phx
+        jsr popax       ; Get the buffer ptr
+        sta P65_ptr1
+        stx P65_ptr1+1
+
+        jsr popax       ; Get file descriptor from stack.
+        sta tmp4        ; Save the value for later.
+        cpx #0          ; Check if it's valid. High byte must be 0.
+        bne bad_fd
+        cmp #MAX_FDS    ; Low byte must be less than MAX_FDS.
+        bcs bad_fd
+
+        jsr getfdflags  ; check if file is open for reading
+        and #O_WRONLY
+        beq bad_fd
+
+        lda tmp4        ; Retrieve fd
+        jsr getfddevice
+        jsr P65_SETDEVICE   ; set active device
+
+        plx             ; get the count off the stack
+        pla
+
+        jsr P65_DEV_WRITE       
+        cpx #$FF        ; Since count is signed, x = $FF can only mean an error
+        beq write_error
+        rts             ; otherwise we can just rts, I think...
+
+write_error:
+        and #$7f        ; clear top bit of error code
+        jmp ___directerrno
+
+bad_fd:
+        plx             ; take the count off the stack before returning
+        pla
+        lda #EBADF
+        jmp ___directerrno      ; Sets errno & returns -1.
+
+.endproc
+
+
+.if 0
 .proc _write
         cmp #0
         bne nonzero
@@ -93,3 +140,4 @@ bad_fd:
         lda #EBADF
         jmp ___directerrno      ; Eventually returns -1 in AX
 .endproc
+.endif

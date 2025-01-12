@@ -81,6 +81,7 @@ P65_program_ret     = $028b		; Store return code of called program
 ;-----------------------------------------------------------------------------
 ; P65 Kernel routines
 
+P65_DEV_WRITE       = $FF9C
 P65_FS_STAT         = $FF9F
 P65_FS_MKDIR		= $FFA2
 P65_FS_RMDIR		= $FFA5
